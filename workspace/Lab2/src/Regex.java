@@ -18,36 +18,36 @@ public class Regex {
 
 		@Override
 		public String visit(EmptySet node) {
-			return "∅";
+			return "0";
 		}
 
 		@Override
 		public String visit(EmptyString node) {
-			return "ε";
+			return "e";
 		}
 
 		@Override
 		public String visit(Symbol node) {
 			// TODO Auto-generated method stub
-			return null;
+			return ""+node.symbol;
 		}
 
 		@Override
 		public String visit(Star node) {
 			// TODO Auto-generated method stub
-			return null;
+			return node.child.accept(this) + '*';
 		}
 
 		@Override
 		public String visit(Sequence node) {
 			// TODO Auto-generated method stub
-			return null;
+			return node.a.accept(this) + node.b.accept(this);
 		}
 
 		@Override
 		public String visit(Or node) {
 			// TODO Auto-generated method stub
-			return null;
+			return node.a.accept(this) + "|" + node.b.accept(this);
 		}
 
 	}
@@ -67,7 +67,11 @@ public class Regex {
 	// Matches "" Accept the end of a string
 	// FIXME: Singleton
 	public static class EmptyString implements Node {
+		private static EmptyString emptyStr = new EmptyString();
 		private EmptyString() {}
+		public static EmptyString getInstance() {
+			return emptyStr;
+		}
 		@Override
 		public <T> T accept(Visitor<T> visitor) {
 			return visitor.visit(this);
@@ -108,9 +112,12 @@ public class Regex {
 		// if the child is an emptyString, return emptyString
 		public static Node getInstance(Node child) {
 			// Compaction (don't bother creating junk)
-			if (child == EmptySet.getInstance())
+			if (child == EmptyString.getInstance())
 				return child;
-			return new Star(child); // Use the flyweight pattern here
+			else if (!map.containsKey(child)) {
+				map.put(child, new Star(child));
+			}
+			return map.get(child); // Use the flyweight pattern here // Use the flyweight pattern here
 		}
 		@Override
 		public <T> T accept(Visitor<T> visitor) {
@@ -121,9 +128,24 @@ public class Regex {
 	// FIXME: Flyweight
 	// FIXME: Compaction
 	public static class Sequence implements Node {
+		private static HashMap<String, Sequence> map = new HashMap<String, Sequence>();
 		Node a, b;
 		public Sequence(Node a, Node b) {
 			this.a = a; this.b = b;
+		}
+		public static Node getInstance(Node a, Node b) {
+			
+			if((a!=EmptyString.getInstance() && b==EmptyString.getInstance()) || a==EmptySet.getInstance())	
+			{
+				return a;
+			}else if((a==EmptyString.getInstance()||a==EmptySet.getInstance())
+					&& (b!=EmptyString.getInstance()&&b!=EmptySet.getInstance()))
+			{
+				return b;
+			}else if (!map.containsKey(a.toString() + b.toString())) {
+				map.put(a.toString() + b.toString(), new Sequence(a,b));			
+			}
+			return map.get(a.toString() + b.toString());
 		}
 		@Override
 		public <T> T accept(Visitor<T> visitor) {
@@ -134,10 +156,27 @@ public class Regex {
 	// FIXME: Flyweight
 	// FIXME: Compaction
 	public static class Or implements Node {
+		private static HashMap<String, Or> map = new HashMap<String, Or>();
 		Node a, b;
 		public Or(Node a, Node b) {
 			this.a = a; this.b = b;
 		}
+	public static Node getInstance(Node a, Node b) {
+			
+			if((a!=EmptyString.getInstance() && a!=EmptySet.getInstance()) 
+				&& (b==EmptyString.getInstance() || b==EmptySet.getInstance()))
+				
+			{
+				return a;
+			}else if((a==EmptyString.getInstance()||a==EmptySet.getInstance())
+					&& (b!=EmptyString.getInstance()&&b!=EmptySet.getInstance()))
+			{
+				return b;
+			}else if (!map.containsKey(a.toString() + "|" + b.toString())) {
+				map.put(a.toString() + "|" + b.toString(), new Or(a,b));
+			}
+			return map.get(a.toString() + "|" + b.toString());
+	}
 		@Override
 		public <T> T accept(Visitor<T> visitor) {
 			return visitor.visit(this);
@@ -163,7 +202,7 @@ public class Regex {
 		public Node visit(Symbol node) {
 			// Dc(c) = ""
 			if (c == node.symbol)
-				return new EmptyString(); // Do the same thing for the empty string
+				return EmptyString.getInstance(); // Do the same thing for the empty string
 			// Dc(c') = 0 if c is not c'
 			else
 				return EmptySet.getInstance();
@@ -171,7 +210,7 @@ public class Regex {
 		@Override
 		public Node visit(Star node) {
 			// Dc(a*) = Dc(a)a*
-			return new Sequence(node.child.accept(this), node);
+			return Sequence.getInstance(node.child.accept(this), node);
 		}
 
 		@Override
@@ -182,7 +221,7 @@ public class Regex {
 				return result;
 			// Dc(AB) = Dc(A)B | Dc(B) if A contains the empty string
 			} else {
-				return new Or(
+				return Or.getInstance(
 						result, // Dc(AB)
 						node.b.accept(this) // Dc(B)
 						);
@@ -191,7 +230,7 @@ public class Regex {
 		@Override
 		public Node visit(Or node) {
 			// Dc(A | B) = Dc(A) | Dc(B)
-			return new Or(node.a.accept(this), node.b.accept(this));
+			return Or.getInstance(node.a.accept(this), node.b.accept(this));
 		}
 	}
 	// Does the regex match the empty string?
@@ -253,7 +292,7 @@ public class Regex {
 			Regex.match(
 				new Sequence(new Symbol('b'),
 						new Sequence(new Symbol('o'),
-								new Symbol('b'))), "a");
+								new Symbol('b'))), "bob");
 		System.out.println(System.nanoTime() - then);
 	}
 }
