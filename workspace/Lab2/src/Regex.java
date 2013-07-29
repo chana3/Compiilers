@@ -13,7 +13,7 @@ public class Regex {
 		T visit(Sequence node);
 		T visit(Or node);
 	}
-	// Item 1:
+	// FIXME: Start here. 
 	public static class Printer implements Visitor<String> {
 
 		@Override
@@ -28,14 +28,12 @@ public class Regex {
 
 		@Override
 		public String visit(Symbol node) {
-			// TODO Auto-generated method stub
 			return ""+node.symbol;
 		}
 
 		@Override
 		public String visit(Star node) {
-			// TODO Auto-generated method stub
-			return node.child.accept(this) + '*';
+			return "(" + node.child.accept(this) + ")*";
 		}
 
 		@Override
@@ -47,7 +45,7 @@ public class Regex {
 		@Override
 		public String visit(Or node) {
 			// TODO Auto-generated method stub
-			return node.a.accept(this) + "|" + node.b.accept(this);
+			return node.a.accept(this) + '|' + node.b.accept(this);
 		}
 
 	}
@@ -276,9 +274,25 @@ public class Regex {
 			System.out.println(regex.accept(printer));
 			regex = regex.accept(d); // regex should match what it used to match, sans first character c
 		}
+		System.out.println(regex.accept(printer));
 		// If the final language contains the empty string, then the original string was in the original language.
 		// Does the regex match the empty string?
 		return regex.accept(nullable);
+	}
+	// Match String s literally
+	// TODO: call getInstance()
+	public static Node fromString(String s) {
+		if (s.length() == 0)
+			return new EmptyString();
+		return new Sequence(new Symbol(s.charAt(0)),
+				fromString(s.substring(1)));
+	}
+	// Create a nested sequence from an array of nodes
+	public static Node seq(Node...s) {
+		return null;
+	}
+	public static Node or(Node...s) {
+		return null;
 	}
 	public static void main(String[] args) {
 		String s = "H";
@@ -289,10 +303,15 @@ public class Regex {
 		// Does a|b match a?
 		long then = System.nanoTime();
 		for (int i = 0; i < 1; i++)
-			Regex.match(
-				new Sequence(new Symbol('b'),
-						new Sequence(new Symbol('o'),
-								new Symbol('b'))), "bob");
+//			Regex.match(
+//				new Sequence(new Symbol('b'),
+//						new Sequence(new Symbol('o'),
+//								new Symbol('b'))), "bob");
+			// bob
+			// ob
+			// b
+			// emptystring
+			Regex.match(Regex.fromString("bob"), "bob");
 		System.out.println(System.nanoTime() - then);
 	}
 }
