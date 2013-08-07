@@ -23,7 +23,12 @@ public class Regex {
 
 		@Override
 		public String visit(EmptyString node) {
-			return "e";
+			if(node==null)
+			{
+				return " ";
+			}else{
+				return "e";
+			}
 		}
 
 		@Override
@@ -67,8 +72,13 @@ public class Regex {
 	public static class EmptyString implements Node {
 		private static EmptyString emptyStr = new EmptyString();
 		private EmptyString() {}
-		public static EmptyString getInstance() {
+		public static EmptyString getInstance(String s) {
+			if(s.length()>0)
+			{
+				emptyStr=null;
+			}
 			return emptyStr;
+			
 		}
 		@Override
 		public <T> T accept(Visitor<T> visitor) {
@@ -110,7 +120,7 @@ public class Regex {
 		// if the child is an emptyString, return emptyString
 		public static Node getInstance(Node child) {
 			// Compaction (don't bother creating junk)
-			if (child == EmptyString.getInstance())
+			if (child == EmptyString.getInstance(""))
 				return child;
 			else if (!map.containsKey(child)) {
 				map.put(child, new Star(child));
@@ -133,11 +143,12 @@ public class Regex {
 		}
 		public static Node getInstance(Node a, Node b) {
 			
-			if((a!=EmptyString.getInstance() && b==EmptyString.getInstance()) || a==EmptySet.getInstance())	
-			{
+			if((b==EmptyString.getInstance("")||b==EmptySet.getInstance())
+					&& (a!=EmptyString.getInstance(a.toString())&&a!=EmptySet.getInstance()))	
+			{	
 				return a;
-			}else if((a==EmptyString.getInstance()||a==EmptySet.getInstance())
-					&& (b!=EmptyString.getInstance()&&b!=EmptySet.getInstance()))
+			}else if((a==EmptyString.getInstance("")||a==EmptySet.getInstance())
+					&& (b!=EmptyString.getInstance(b.toString())&&b!=EmptySet.getInstance()))
 			{
 				return b;
 			}else if (!map.containsKey(a.toString() + b.toString())) {
@@ -161,13 +172,12 @@ public class Regex {
 		}
 	public static Node getInstance(Node a, Node b) {
 			
-			if((a!=EmptyString.getInstance() && a!=EmptySet.getInstance()) 
-				&& (b==EmptyString.getInstance() || b==EmptySet.getInstance()))
-				
+			if((a!=EmptySet.getInstance()) 
+				&& (b==EmptySet.getInstance()))
 			{
 				return a;
-			}else if((a==EmptyString.getInstance()||a==EmptySet.getInstance())
-					&& (b!=EmptyString.getInstance()&&b!=EmptySet.getInstance()))
+			}else if((a==EmptySet.getInstance())
+					&& (b!=EmptySet.getInstance()))
 			{
 				return b;
 			}else if (!map.containsKey(a.toString() + "|" + b.toString())) {
@@ -200,7 +210,7 @@ public class Regex {
 		public Node visit(Symbol node) {
 			// Dc(c) = ""
 			if (c == node.symbol)
-				return EmptyString.getInstance(); // Do the same thing for the empty string
+				return EmptyString.getInstance(""); // Do the same thing for the empty string
 			// Dc(c') = 0 if c is not c'
 			else
 				return EmptySet.getInstance();
@@ -283,7 +293,7 @@ public class Regex {
 	// TODO: call getInstance()
 	public static Node fromString(String s) {
 		if (s.length() == 0)
-			return new EmptyString();
+			return EmptyString.getInstance("");
 		return new Sequence(new Symbol(s.charAt(0)),
 				fromString(s.substring(1)));
 	}
