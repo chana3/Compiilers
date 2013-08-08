@@ -50,7 +50,7 @@ private int expression () {
 
 
 private int term () {
-    //    term = factor { ( "*" | "/" ) factor }
+    //term ::=  factor (( '*' factor) | ( '/' factor))*
 
     int left = factor( );
     while (scanner.token == Token.timesop || 
@@ -72,7 +72,7 @@ private int term () {
 
 
 private int factor ( ) {
-    //    factor    = number |  group
+    //factor ::=  (integer) | (group)
 
     int value = 0;
     switch (scanner.token) {
