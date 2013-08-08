@@ -1,6 +1,8 @@
 
 import static library.Combinators.*;
 
+import java.io.DataInputStream;
+
 public class Expression {
 	public static Parser grammar() {
 		Nonterminal group = new Nonterminal("group");
@@ -9,8 +11,8 @@ public class Expression {
 		Nonterminal expression = new Nonterminal("expression");
 		
 		// group       ::= '(' expression ')'
-		group.derives(symbol('('), expression, symbol(')'));
-		// factor      ::= integer | group
+		group.derives( symbol('('),expression, symbol(')'));
+		// factor      ::= integer | '(' group ')'
 		factor.derives(or (integer(), group));
 		// term        ::= factor (('*' factor) | ('/' factor))*
 		term.derives(factor, star(or(seq(symbol('*'), factor), seq(symbol('/'), factor))));
@@ -21,5 +23,7 @@ public class Expression {
 	public static void main(String[] args) {
 		Printer printer = new Printer();
 		System.out.println(grammar().accept(printer));
+		RDParsing parse = new RDParsing(new Scanner(new DataInputStream(System.in)));
+		parse.run();
 	}
 }
