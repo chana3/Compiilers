@@ -12,16 +12,27 @@ public RDParsing(Scanner scanner) {
 
 public void run () {
     scanner.getToken();
-    group();
+    while(scanner.token!=Token.period)
+    {
+    	int value=group();
+        System.out.println("= "+value);
+        System.out.println("The group fits within the rules.");
+        scanner.start=true;
+        scanner.getToken();
+    }
 } 
 
 
 private int group () {
     //group ::= '(' expression ')'
+    if (scanner.token== Token.leftP)
+	{
+    	scanner.getToken();
+    }
     int value=expression();
-    System.out.println("= "+value);
-    System.out.println("The group fits within the rules.");
-    scanner.start=true;
+    if (scanner.token!= Token.rightP)
+		scanner.error("Missing ')'");
+    scanner.start=false;
     scanner.getToken();
     return value;
     
@@ -81,11 +92,7 @@ private int factor ( ) {
 	    scanner.getToken( );
 	    break;
 	case Token.leftP:
-	    scanner.getToken( );
 	    value = group();
-	    if (scanner.token!= Token.rightP)
-		scanner.error("Missing ')'");
-	    scanner.getToken( );
 	    break;
 	default:
 	    scanner.error("Expecting number or (");
