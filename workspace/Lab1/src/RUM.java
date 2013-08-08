@@ -303,5 +303,75 @@ public class RUM {
 //		Printer printer = new Printer();
 //		printer.visit(program);
 	}
-	
+	public static class Compiler implements Visitor<Void>
+	{
+
+		@Override
+		public Void visit(Left node) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Void visit(Right node) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Void visit(Increment node) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Void visit(Decrement node) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Void visit(Input node) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Void visit(Output node) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Void visit(Loop node) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Void visit(Program node) {
+			System.out.println("import ");
+			return null;
+		}
+
+		@Override
+		public Void visit(Sequence node) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Void visit(ProcedureDefinition node) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Void visit(ProcedureInvocation node) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		
+	}
 }
