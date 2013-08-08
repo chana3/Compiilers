@@ -23,12 +23,7 @@ public class Regex {
 
 		@Override
 		public String visit(EmptyString node) {
-			if(node==null)
-			{
-				return " ";
-			}else{
-				return "e";
-			}
+			return "e";
 		}
 
 		@Override
@@ -72,11 +67,7 @@ public class Regex {
 	public static class EmptyString implements Node {
 		private static EmptyString emptyStr = new EmptyString();
 		private EmptyString() {}
-		public static EmptyString getInstance(String s) {
-			if(s.length()>0)
-			{
-				emptyStr=null;
-			}
+		public static EmptyString getInstance() {
 			return emptyStr;
 			
 		}
@@ -120,7 +111,7 @@ public class Regex {
 		// if the child is an emptyString, return emptyString
 		public static Node getInstance(Node child) {
 			// Compaction (don't bother creating junk)
-			if (child == EmptyString.getInstance(""))
+			if (child == EmptyString.getInstance())
 				return child;
 			else if (!map.containsKey(child)) {
 				map.put(child, new Star(child));
@@ -143,16 +134,27 @@ public class Regex {
 		}
 		public static Node getInstance(Node a, Node b) {
 			
-			if((b==EmptyString.getInstance("")||b==EmptySet.getInstance())
-					&& (a!=EmptyString.getInstance(a.toString())&&a!=EmptySet.getInstance()))	
+			if((b==EmptyString.getInstance()||b==EmptySet.getInstance())
+					&& (a!=EmptyString.getInstance()&&a!=EmptySet.getInstance()))	
 			{	
 				return a;
-			}else if((a==EmptyString.getInstance("")||a==EmptySet.getInstance())
-					&& (b!=EmptyString.getInstance(b.toString())&&b!=EmptySet.getInstance()))
+			}else if((a==EmptyString.getInstance()||a==EmptySet.getInstance())
+					&& (b!=EmptyString.getInstance()&&b!=EmptySet.getInstance()))
 			{
 				return b;
 			}else if (!map.containsKey(a.toString() + b.toString())) {
-				map.put(a.toString() + b.toString(), new Sequence(a,b));			
+				/*if((b.toString().length()>0)&&(b.toString().charAt( b.toString().length()-1 )==EmptyString.getInstance().toString().charAt(0)))
+				{
+					String s = b.toString().replace(EmptyString.getInstance().toString(), "");
+					map.put(a.toString() + s, new Sequence(a,b));
+				}
+				else if((a.toString().length()>0)&&(a.toString().charAt(0)==EmptyString.getInstance().toString().charAt(0)))
+				{
+					String s = a.toString().replace(EmptyString.getInstance().toString(), "");
+					map.put(s + b.toString(), new Sequence(a,b));
+				}{*/
+						map.put(a.toString() + b.toString(), new Sequence(a,b));	
+				
 			}
 			return map.get(a.toString() + b.toString());
 		}
@@ -172,18 +174,18 @@ public class Regex {
 		}
 	public static Node getInstance(Node a, Node b) {
 			
-			if((a!=EmptySet.getInstance()) 
-				&& (b==EmptySet.getInstance()))
-			{
-				return a;
-			}else if((a==EmptySet.getInstance())
-					&& (b!=EmptySet.getInstance()))
-			{
-				return b;
-			}else if (!map.containsKey(a.toString() + "|" + b.toString())) {
-				map.put(a.toString() + "|" + b.toString(), new Or(a,b));
-			}
-			return map.get(a.toString() + "|" + b.toString());
+		if((a!=EmptySet.getInstance()) 
+			&& (b==EmptySet.getInstance()))
+		{
+			return a;
+		}else if((a==EmptySet.getInstance())
+				&& (b!=EmptySet.getInstance()))
+		{
+			return b;
+		}else if (!map.containsKey(a.toString() + "|" + b.toString())) {
+			map.put(a.toString() + "|" + b.toString(), new Or(a,b));
+		}
+		return map.get(a.toString() + "|" + b.toString());
 	}
 		@Override
 		public <T> T accept(Visitor<T> visitor) {
@@ -210,7 +212,7 @@ public class Regex {
 		public Node visit(Symbol node) {
 			// Dc(c) = ""
 			if (c == node.symbol)
-				return EmptyString.getInstance(""); // Do the same thing for the empty string
+				return EmptyString.getInstance(); // Do the same thing for the empty string
 			// Dc(c') = 0 if c is not c'
 			else
 				return EmptySet.getInstance();
@@ -223,7 +225,7 @@ public class Regex {
 
 		@Override
 		public Node visit(Sequence node) {
-			Node result = new Sequence(node.a.accept(this), node.b);
+			Node result = Sequence.getInstance(node.a.accept(this), node.b);
 			// Dc(AB) = Dc(A)B if A does not contain the empty string
 			if (!node.a.accept(nullable)) {
 				return result;
@@ -293,7 +295,7 @@ public class Regex {
 	// TODO: call getInstance()
 	public static Node fromString(String s) {
 		if (s.length() == 0)
-			return EmptyString.getInstance("");
+			return EmptyString.getInstance();
 		return new Sequence(new Symbol(s.charAt(0)),
 				fromString(s.substring(1)));
 	}
