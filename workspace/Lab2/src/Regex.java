@@ -133,9 +133,8 @@ public class Regex {
 			this.a = a; this.b = b;
 		}
 		public static Node getInstance(Node a, Node b) {
-			
-			if((b==EmptyString.getInstance()||b==EmptySet.getInstance())
-					&& (a!=EmptyString.getInstance()&&a!=EmptySet.getInstance()))	
+			if(((b==EmptyString.getInstance()||b==EmptySet.getInstance())
+					&& (a!=EmptyString.getInstance()&&a!=EmptySet.getInstance())))	
 			{	
 				return a;
 			}else if((a==EmptyString.getInstance()||a==EmptySet.getInstance())
@@ -143,19 +142,9 @@ public class Regex {
 			{
 				return b;
 			}else if (!map.containsKey(a.toString() + b.toString())) {
-				/*if((b.toString().length()>0)&&(b.toString().charAt( b.toString().length()-1 )==EmptyString.getInstance().toString().charAt(0)))
-				{
-					String s = b.toString().replace(EmptyString.getInstance().toString(), "");
-					map.put(a.toString() + s, new Sequence(a,b));
-				}
-				else if((a.toString().length()>0)&&(a.toString().charAt(0)==EmptyString.getInstance().toString().charAt(0)))
-				{
-					String s = a.toString().replace(EmptyString.getInstance().toString(), "");
-					map.put(s + b.toString(), new Sequence(a,b));
-				}{*/
-						map.put(a.toString() + b.toString(), new Sequence(a,b));	
-				
+				map.put(a.toString() + b.toString(), new Sequence(a,b));	
 			}
+
 			return map.get(a.toString() + b.toString());
 		}
 		@Override
@@ -174,8 +163,9 @@ public class Regex {
 		}
 	public static Node getInstance(Node a, Node b) {
 			
-		if((a!=EmptySet.getInstance()) 
-			&& (b==EmptySet.getInstance()))
+		if(((a!=EmptySet.getInstance()) 
+				&& (b==EmptySet.getInstance()))
+			|| (a==b))
 		{
 			return a;
 		}else if((a==EmptySet.getInstance())
@@ -296,7 +286,7 @@ public class Regex {
 	public static Node fromString(String s) {
 		if (s.length() == 0)
 			return EmptyString.getInstance();
-		return new Sequence(new Symbol(s.charAt(0)),
+		return Sequence.getInstance(Symbol.getInstance(s.charAt(0)),
 				fromString(s.substring(1)));
 	}
 	// Create a nested sequence from an array of nodes
