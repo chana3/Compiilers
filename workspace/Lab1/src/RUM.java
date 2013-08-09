@@ -300,75 +300,111 @@ public class RUM {
 		Program program = new RUM().parse("(++++++++++<[>+>+<<-]>>[<<+>>-])>::::::::::::::<<<<<<<--------.>>>---------.+++++++..>---------.<<<<<<<------.<--------.>>>>>---.>>>.+++.<.--------.<<<<<<<+.");
 		Interpreter interpreter = new Interpreter();
 		program.accept(interpreter);
-//		Printer printer = new Printer();
-//		printer.visit(program);
+		//Printer printer = new Printer();
+		//printer.visit(program);
+		System.out.println();
+		Compiler compiler = new Compiler();
+		compiler.visit(program);
 	}
 	public static class Compiler implements Visitor<Void>
 	{
-
 		@Override
 		public Void visit(Left node) {
 			// TODO Auto-generated method stub
+			System.out.println("pointer--");
 			return null;
 		}
 
 		@Override
 		public Void visit(Right node) {
 			// TODO Auto-generated method stub
+			System.out.println("pointer++");
 			return null;
 		}
 
 		@Override
 		public Void visit(Increment node) {
 			// TODO Auto-generated method stub
+			System.out.println("cell[pointer]++");
 			return null;
 		}
 
 		@Override
 		public Void visit(Decrement node) {
 			// TODO Auto-generated method stub
+			System.out.println("cell[pointer]--");
 			return null;
 		}
 
 		@Override
 		public Void visit(Input node) {
-			// TODO Auto-generated method stub
+			// TODO Scanner?
+			System.out.println("try {");
+			System.out.println("	cell[pointer] = (byte) System.in.read();");
+			System.out.println("} catch (IOException e) {});");
 			return null;
 		}
 
 		@Override
 		public Void visit(Output node) {
-			// TODO Auto-generated method stub
+			// TODO System.out.print();
+			System.out.println("System.out.print((char)cell[pointer]);" );
 			return null;
 		}
 
 		@Override
 		public Void visit(Loop node) {
 			// TODO Auto-generated method stub
+			System.out.println("while (cell[pointer] != 0) ");
+			System.out.println("{");
+			System.out.println("node.child.accept(this);");
+			node.child.accept(this);
+			System.out.println("}");
 			return null;
 		}
 
 		@Override
 		public Void visit(Program node) {
-			System.out.println("import ");
+			//TODO System.out.print("import ");
+			System.out.println("cell = new byte[30000];");
+			System.out.println("pointer = 0;");
+			System.out.println("procedures = new Procedure[256];");
+			System.out.println("node.child.accept(this);");
+			node.child.accept(this);
 			return null;
 		}
 
 		@Override
 		public Void visit(Sequence node) {
 			// TODO Auto-generated method stub
+			System.out.println("for (Node child : node.children)");
+			
+			for (Node child : node.children) {
+				System.out.println("{");
+				System.out.println("child.accept(this);");
+				child.accept(this);
+			}
+			System.out.println("}");
 			return null;
 		}
 
 		@Override
 		public Void visit(ProcedureDefinition node) {
 			// TODO Auto-generated method stub
+			System.out.println("final Interpreter that = this;");
+			System.out.println("procedures[cell[pointer]] = new Procedure() {");
+			System.out.println("@Override");
+			System.out.println("public void execute() ");
+			System.out.println("{node.child.accept(that);}");
+			node.child.accept(this);
+			System.out.println("};");
 			return null;
 		}
 
 		@Override
 		public Void visit(ProcedureInvocation node) {
 			// TODO Auto-generated method stub
+			System.out.println("procedures[cell[pointer]].execute();");
 			return null;
 		}
 
